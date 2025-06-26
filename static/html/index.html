@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuGen - AI智能文档生成系统</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e7e7e7;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-links a:hover {
+            color: #007bff;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            background: #fff;
+            padding: 4rem 0;
+            text-align: center;
+            border-bottom: 1px solid #e7e7e7;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #fff;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        /* 功能区域 */
+        .features {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title p {
+            color: #6c757d;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #fff;
+            padding: 2rem;
+            border: 1px solid #e7e7e7;
+            border-radius: 0.25rem;
+            text-align: left;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid #e7e7e7;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* For simplicity, we hide nav links on mobile. A hamburger menu would be a full solution. */
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">📄 DocuGen</a>
+            <ul class="nav-links">
+                <li><a href="#features">功能</a></li>
+                <li><a href="/document-generator">开始使用</a></li>
+                <li><a href="https://github.com/BetaStreetOmnis/DocuGen" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+</svg> 开源地址</a></li>
+                </ul>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main>
+        <!-- 英雄区域 -->
+        <section class="hero" id="home">
+            <div class="container">
+                <h1>AI智能文档生成系统</h1>
+                <p>一个简洁、高效的开源AI文档生成工具，提升您的工作效率。</p>
+                <a href="/document-generator" class="btn">🚀 立即开始</a>
+            </div>
+        </section>
+
+        <!-- 功能区域 -->
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-title">
+                    <h2>核心功能</h2>
+                    <p>为您提供全方位的AI文档生成解决方案</p>
+                        </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>智能文档生成</h3>
+                        <p>基于先进的AI技术，根据您的需求自动生成高质量的文档内容，支持多种文档类型和格式。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>模板化生成</h3>
+                        <p>支持自定义模板上传，AI智能填充内容，确保文档格式统一，提高工作效率。</p>
+                </div>
+                    <div class="feature-card">
+                        <h3>知识库增强</h3>
+                        <p>集成RAG技术，利用您的专业知识库，生成更加准确、专业的文档内容。</p>
+            </div>
+                    <div class="feature-card">
+                        <h3>智能问答</h3>
+                        <p>提供智能问答功能，随时解答您的疑问，协助您完善文档内容。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>实时流式生成</h3>
+                        <p>采用流式生成技术，实时展示文档创建过程，让您见证AI的创作过程。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>多格式导出</h3>
+                        <p>支持Markdown、Word、HTML等多种格式导出，满足不同场景的使用需求。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 DocuGen. 这是一个开源项目. <a href="https://github.com/BetaStreetOmnis/DocuGen" target="_blank" rel="noopener noreferrer">在 GitHub 上查看</a>.</p>
+        </div>
+    </footer>
+
+    <!-- The original script might not be needed for this simplified page -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 

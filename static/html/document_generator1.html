@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档生成 - DocuGen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+        }
+        .form-switch .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .rag-options {
+            display: none;
+        }
+        .rag-options.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-file-earmark-text me-2"></i>DocuGen
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house me-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/document-generator"><i class="bi bi-file-earmark-text me-1"></i>文档生成</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/template-generator"><i class="bi bi-file-earmark-richtext me-1"></i>模板生成</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="modelDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear me-1"></i>模型设置
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="modelDropdown">
+                            <li><a class="dropdown-item model-switch" data-model="local" href="#"><i class="bi bi-cpu me-1"></i>本地模型</a></li>
+                            <li><a class="dropdown-item model-switch" data-model="third_party" href="#"><i class="bi bi-cloud me-1"></i>第三方模型</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="page-header bg-light py-4">
+                <div class="container">
+                    <h1 class="display-5 fw-bold"><i class="bi bi-file-earmark-text"></i> AI文档生成</h1>
+                    <p class="lead">输入主题和关键点，让AI为您生成专业的文档大纲和内容</p>
+                </div>
+            </div>
+
+            <div class="container py-4">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="bi bi-pencil"></i> 文档信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="documentForm">
+                                    <div class="mb-3">
+                                        <label for="topic" class="form-label">文档主题</label>
+                                        <input type="text" class="form-control" id="topic" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="keyPoints" class="form-label">关键点（可选）</label>
+                                        <textarea class="form-control" id="keyPoints" rows="3" placeholder="输入需要包含的关键点，每行一个"></textarea>
+                                    </div>
+                                    
+                                    <!-- RAG功能开关 -->
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="enableRag">
+                                            <label class="form-check-label" for="enableRag">
+                                                <i class="bi bi-database"></i> 启用知识库增强
+                                                <small class="text-muted d-block">使用已有知识库内容辅助生成更专业的文档</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- RAG选项（默认隐藏） -->
+                                    <div class="rag-options mb-3">
+                                        <label for="kbName" class="form-label">选择知识库</label>
+                                        <select class="form-select" id="kbName">
+                                            <option value="">请选择知识库...</option>
+                                            <option value="default">默认知识库</option>
+                                            <option value="technical">技术文档库</option>
+                                            <option value="business">商业文档库</option>
+                                        </select>
+                                        <small class="text-muted">选择合适的知识库以获得更好的生成效果</small>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-primary" id="generateOutline">
+                                            <i class="bi bi-list-nested"></i> 生成大纲
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="bi bi-file-text"></i> 文档大纲</h5>
+                            </div>
+                            <div class="card-body">
+                                <textarea id="outlineEditor"></textarea>
+                                <div class="mt-3 d-flex justify-content-between">
+                                    <button class="btn btn-success" id="generateFullText" disabled>
+                                        <i class="bi bi-file-earmark-text"></i> 生成全文
+                                    </button>
+                                    <button class="btn btn-primary" id="exportWord" disabled>
+                                        <i class="bi bi-file-earmark-word"></i> 导出Word
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2024 DocuGen. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 初始化编辑器
+            var easyMDE = new EasyMDE({
+                element: document.getElementById('outlineEditor'),
+                autofocus: true,
+                spellChecker: false,
+                status: false
+            });
+            
+            // RAG开关处理
+            $('#enableRag').change(function() {
+                if ($(this).is(':checked')) {
+                    $('.rag-options').addClass('show');
+                } else {
+                    $('.rag-options').removeClass('show');
+                    $('#kbName').val(''); // 清空选择
+                }
+            });
+
+            // 生成大纲
+            $('#generateOutline').click(function() {
+                const topic = $('#topic').val();
+                const keyPoints = $('#keyPoints').val();
+                const enableRag = $('#enableRag').is(':checked');
+                const kbName = enableRag ? $('#kbName').val() : '';
+                
+                if (!topic) {
+                    alert('请输入文档主题');
+                    return;
+                }
+                
+                if (enableRag && !kbName) {
+                    alert('请选择知识库');
+                    return;
+                }
+                
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> 生成中...');
+                
+                // 调用生成大纲API
+                $.ajax({
+                    url: '/api/generate-outline',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        topic: topic,
+                        key_points: keyPoints,
+                        enable_rag: enableRag,
+                        kb_name: kbName
+                    }),
+                    success: function(response) {
+                        easyMDE.value(response.outline);
+                        $('#generateFullText').prop('disabled', false);
+                        $('#exportWord').prop('disabled', false);
+                    },
+                    error: function(xhr) {
+                        alert('生成失败：' + (xhr.responseJSON?.error || '未知错误'));
+                    },
+                    complete: function() {
+                        $('#generateOutline').prop('disabled', false).html('<i class="bi bi-list-nested"></i> 生成大纲');
+                    }
+                });
+            });
+
+            // 生成全文
+            $('#generateFullText').click(function() {
+                const outline = easyMDE.value();
+                const keyPoints = $('#keyPoints').val();
+                
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> 生成中...');
+                
+                $.ajax({
+                    url: '/api/generate-fulltext',
+                    method: 'POST',
+                    data: {
+                        outline: outline,
+                        key_points: keyPoints
+                    },
+                    success: function(response) {
+                        if (response.task_id) {
+                            startPollingStatus(response.task_id);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('生成失败：' + (xhr.responseJSON?.error || '未知错误'));
+                        $('#generateFullText').prop('disabled', false)
+                            .html('<i class="bi bi-file-earmark-text"></i> 生成全文');
+                    }
+                });
+            });
+
+            // 导出Word
+            $('#exportWord').click(function() {
+                const content = easyMDE.value();
+                const contentType = 'outline'; // 或 'fulltext'
+                
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> 导出中...');
+                
+                $.ajax({
+                    url: '/api/export-word',
+                    method: 'POST',
+                    data: {
+                        content: content,
+                        content_type: contentType
+                    },
+                    success: function(response) {
+                        if (response.filename) {
+                            window.location.href = '/download/' + response.filename;
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('导出失败：' + (xhr.responseJSON?.error || '未知错误'));
+                    },
+                    complete: function() {
+                        $('#exportWord').prop('disabled', false)
+                            .html('<i class="bi bi-file-earmark-word"></i> 导出Word');
+                    }
+                });
+            });
+
+            // 轮询生成状态
+            function startPollingStatus(taskId) {
+                let pollInterval = setInterval(function() {
+                    $.ajax({
+                        url: '/api/generation-status/' + taskId,
+                        method: 'GET',
+                        success: function(response) {
+                            if (response.status === 'completed') {
+                                clearInterval(pollInterval);
+                                easyMDE.value(response.full_text);
+                                $('#generateFullText').prop('disabled', false)
+                                    .html('<i class="bi bi-file-earmark-text"></i> 生成全文');
+                            } else if (response.status === 'error') {
+                                clearInterval(pollInterval);
+                                alert('生成失败：' + response.error);
+                                $('#generateFullText').prop('disabled', false)
+                                    .html('<i class="bi bi-file-earmark-text"></i> 生成全文');
+                            }
+                        },
+                        error: function() {
+                            clearInterval(pollInterval);
+                            alert('获取生成状态失败');
+                            $('#generateFullText').prop('disabled', false)
+                                .html('<i class="bi bi-file-earmark-text"></i> 生成全文');
+                        }
+                    });
+                }, 2000); // 每2秒检查一次
+            }
+        });
+    </script>
+</body>
+</html> 

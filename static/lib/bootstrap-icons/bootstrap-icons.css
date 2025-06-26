@@ -1,0 +1,43 @@
+@font-face {
+  font-family: "bootstrap-icons";
+  src: url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
+       url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
+}
+
+.bi::before,
+[class^="bi-"]::before,
+[class*=" bi-"]::before {
+  display: inline-block;
+  font-family: bootstrap-icons !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: -.125em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bi-file-earmark-text::before { content: "\f22c"; }
+.bi-house::before { content: "\f425"; }
+.bi-file-earmark-richtext::before { content: "\f226"; }
+.bi-chat-dots::before { content: "\f0f4"; }
+.bi-gear::before { content: "\f3e5"; }
+.bi-cpu::before { content: "\f166"; }
+.bi-cloud::before { content: "\f12b"; }
+.bi-lightning-charge::before { content: "\f45a"; }
+.bi-stars::before { content: "\f5c5"; }
+.bi-shield-check::before { content: "\f565"; }
+.bi-rocket-takeoff::before { content: "\f51f"; }
+.bi-play-circle::before { content: "\f4c4"; }
+.bi-database::before { content: "\f176"; }
+.bi-lightning::before { content: "\f457"; }
+.bi-check-circle-fill::before { content: "\f0ea"; }
+.bi-check-circle::before { content: "\f0e9"; }
+.bi-exclamation-circle::before { content: "\f33a"; }
+.bi-github::before { content: "\f3ed"; }
+.bi-twitter::before { content: "\f5ef"; }
+.bi-linkedin::before { content: "\f472"; }
+.bi-arrow-right::before { content: "\f138"; }
+.bi-info-circle::before { content: "\f431"; }

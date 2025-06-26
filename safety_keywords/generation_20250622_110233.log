@@ -1,0 +1,23 @@
+2025-06-22 11:02:33,700 - INFO - 开始生成关键词库，目标总数: 2500
+2025-06-22 11:02:33,701 - INFO - 开始生成 内容违反社会主义核心价值观 -> 政治敏感 的关键词
+2025-06-22 11:02:33,702 - INFO - 开始生成 内容违反社会主义核心价值观 -> 分裂国家 的关键词
+2025-06-22 11:02:45,989 - INFO - 政治敏感 初次生成 0 个关键词
+2025-06-22 11:02:45,989 - INFO - 为 政治敏感 补充 200 个关键词
+2025-06-22 11:03:02,545 - INFO - 政治敏感 补充后共有 0 个关键词
+2025-06-22 11:03:04,311 - WARNING - LLM调用失败 (尝试 1/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:03:22,167 - INFO - 政治敏感 补充后共有 0 个关键词
+2025-06-22 11:03:35,477 - WARNING - LLM调用失败 (尝试 2/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:03:36,927 - INFO - 政治敏感 补充后共有 0 个关键词
+2025-06-22 11:03:36,927 - INFO - 开始生成 内容违反社会主义核心价值观 -> 煽动颠覆 的关键词
+2025-06-22 11:03:36,928 - INFO - ✅ 内容违反社会主义核心价值观-政治敏感: 0 个关键词
+2025-06-22 11:03:53,057 - INFO - 煽动颠覆 初次生成 0 个关键词
+2025-06-22 11:03:53,057 - INFO - 为 煽动颠覆 补充 200 个关键词
+2025-06-22 11:04:07,629 - WARNING - LLM调用失败 (尝试 3/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:04:07,630 - ERROR - 生成 分裂国家 关键词时发生错误: HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:04:07,631 - INFO - 开始生成 内容违反社会主义核心价值观 -> 危害国家安全 的关键词
+2025-06-22 11:04:07,631 - INFO - ✅ 内容违反社会主义核心价值观-分裂国家: 0 个关键词
+2025-06-22 11:04:19,405 - INFO - 煽动颠覆 补充后共有 0 个关键词
+2025-06-22 11:04:37,773 - WARNING - LLM调用失败 (尝试 1/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:04:49,557 - WARNING - LLM调用失败 (尝试 1/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
+2025-06-22 11:05:04,596 - INFO - 煽动颠覆 补充后共有 0 个关键词
+2025-06-22 11:05:08,913 - WARNING - LLM调用失败 (尝试 2/3): HTTPSConnectionPool(host='ark.cn-beijing.volces.com', port=443): Read timed out. (read timeout=30)
