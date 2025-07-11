@@ -1,14 +1,19 @@
+/* Bootstrap Icons - 本地化版本 */
+/* 注意：如果字体文件无法加载，图标将显示为文本符号 */
+
 @font-face {
   font-family: "bootstrap-icons";
-  src: url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
-       url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
+  src: url("fonts/bootstrap-icons.woff2") format("woff2"),
+       url("fonts/bootstrap-icons.woff") format("woff");
+  font-display: swap; /* 提供更好的加载体验 */
 }
 
+/* 基础图标样式 - 优化了备用字体 */
 .bi::before,
 [class^="bi-"]::before,
 [class*=" bi-"]::before {
   display: inline-block;
-  font-family: bootstrap-icons !important;
+  font-family: bootstrap-icons, "Segoe UI Symbol", "Segoe UI Emoji", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", sans-serif !important;
   font-style: normal;
   font-weight: normal !important;
   font-variant: normal;
@@ -19,6 +24,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 核心图标定义 */
 .bi-file-earmark-text::before { content: "\f22c"; }
 .bi-house::before { content: "\f425"; }
 .bi-file-earmark-richtext::before { content: "\f226"; }
@@ -41,3 +47,65 @@
 .bi-linkedin::before { content: "\f472"; }
 .bi-arrow-right::before { content: "\f138"; }
 .bi-info-circle::before { content: "\f431"; }
+
+/* 添加更多常用图标 */
+.bi-pencil-square::before { content: "\f4cb"; }
+.bi-magic::before { content: "\f479"; }
+.bi-clipboard::before { content: "\f10b"; }
+.bi-download::before { content: "\f1c1"; }
+.bi-arrow-repeat::before { content: "\f13c"; }
+.bi-arrow-clockwise::before { content: "\f134"; }
+.bi-send::before { content: "\f54c"; }
+.bi-robot::before { content: "\f51e"; }
+.bi-person::before { content: "\f4da"; }
+.bi-book::before { content: "\f0c6"; }
+.bi-plus-circle::before { content: "\f4e2"; }
+.bi-trash::before { content: "\f5de"; }
+.bi-pencil::before { content: "\f4ca"; }
+.bi-search::before { content: "\f52a"; }
+.bi-bell::before { content: "\f09f"; }
+.bi-question-circle::before { content: "\f504"; }
+
+/* 字体文件未正确加载时的Unicode备用方案 */
+.bi-file-earmark-text::after { content: "📄"; display: none; }
+.bi-house::after { content: "🏠"; display: none; }
+.bi-file-earmark-richtext::after { content: "📝"; display: none; }
+.bi-chat-dots::after { content: "💬"; display: none; }
+.bi-gear::after { content: "⚙️"; display: none; }
+.bi-cpu::after { content: "🖥️"; display: none; }
+.bi-cloud::after { content: "☁️"; display: none; }
+.bi-database::after { content: "🗄️"; display: none; }
+.bi-lightning::after { content: "⚡"; display: none; }
+.bi-check-circle::after { content: "✅"; display: none; }
+.bi-exclamation-circle::after { content: "⚠️"; display: none; }
+.bi-arrow-right::after { content: "→"; display: none; }
+.bi-info-circle::after { content: "ℹ️"; display: none; }
+.bi-search::after { content: "🔍"; display: none; }
+.bi-plus-circle::after { content: "➕"; display: none; }
+.bi-pencil::after { content: "✏️"; display: none; }
+.bi-trash::after { content: "🗑️"; display: none; }
+.bi-download::after { content: "⬇️"; display: none; }
+.bi-send::after { content: "📤"; display: none; }
+.bi-person::after { content: "👤"; display: none; }
+.bi-book::after { content: "📚"; display: none; }
+
+/* 检测字体是否加载成功，如果失败则显示备用符号 */
+@supports not (font-family: bootstrap-icons) {
+  .bi::before,
+  [class^="bi-"]::before,
+  [class*=" bi-"]::before {
+    display: none;
+  }
+  
+  .bi::after,
+  [class^="bi-"]::after,
+  [class*=" bi-"]::after {
+    display: inline-block !important;
+  }
+}
+
+/* 为无法显示Unicode的情况提供文本备用 */
+.bi-file-earmark-text[title=""]::before { content: "[文档]"; }
+.bi-house[title=""]::before { content: "[首页]"; }
+.bi-gear[title=""]::before { content: "[设置]"; }
+.bi-search[title=""]::before { content: "[搜索]"; }

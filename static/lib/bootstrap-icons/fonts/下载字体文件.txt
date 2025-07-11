@@ -1,0 +1,31 @@
+⚠️ 重要提示：Bootstrap Icons字体文件缺失
+
+当前目录中的字体文件是临时占位符，需要替换为真正的字体文件才能正确显示图标。
+
+📥 下载方法：
+
+方法1：浏览器直接下载
+1. 右键点击以下链接，选择"另存为"：
+   - https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff2
+   - https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff
+
+2. 将下载的文件保存到此目录，替换现有的同名文件
+
+方法2：使用PowerShell命令
+在项目根目录打开PowerShell，执行：
+
+cd static/lib/bootstrap-icons/fonts/
+Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff2" -OutFile "bootstrap-icons.woff2"
+Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff" -OutFile "bootstrap-icons.woff"
+
+📁 正确的文件大小：
+- bootstrap-icons.woff2: 约 160KB
+- bootstrap-icons.woff: 约 240KB
+
+✅ 验证方法：
+下载完成后刷新页面，检查：
+1. 不再有404错误
+2. 图标显示正常（不是emoji符号）
+
+❓ 如果无法下载：
+系统已配置了emoji备用方案，功能不受影响，只是图标显示为emoji符号。 
