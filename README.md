@@ -9,7 +9,7 @@
 </div>
 
 <p align="center">
-  <a href="http://150.138.81.55:8080/" target="_blank">
+  <a href="124.132.152.75:8080/" target="_blank">
     <img alt="Live Demo" src="https://img.shields.io/badge/🚀_在线体验-brightgreen.svg"/>
   </a>
   <a href="https://github.com/BetaStreetOmnis/EasyRAG">
@@ -38,7 +38,7 @@
 
 - 📄 支持 PDF、Word、Markdown 等格式
 - 🔍 自动建立向量索引，智能检索
-- 🌐 在线体验：http://150.138.81.55:8024/static/index.html
+- 🌐 在线体验：http://easyrag.net/static/index.html
 
 ![知识库问答](docs/images/qa.png)
 
