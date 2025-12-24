@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, StreamingResponse
@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 import uuid
 import uvicorn
 import json
+import re
 import asyncio
 
 # 导入功能模块
@@ -17,6 +18,51 @@ from llm.client import LLMClient
 from base_templates_generator.base_templates_generator import BaseTemplatesGenerator
 from generator_doc.generator_doc import DocumentGenerator
 from knowledge_connect.get_rag_data import get_rag_data, get_knowledge_bases, format_rag_content
+from template_store import TemplateStore, DEFAULT_TEMPLATE_METADATA
+
+def build_reference_text(
+    enable_rag: bool,
+    kb_name: str,
+    query: str,
+    manual_content: str = "",
+) -> Tuple[str, Optional[str], Optional[str], Optional[Dict[str, Any]]]:
+    def humanize_error(error: str) -> str:
+        if not error:
+            return "未知错误"
+        normalized = error.lower()
+        if "connection refused" in normalized or "failed to establish a new connection" in normalized:
+            return "无法连接到RAG服务，请确认RAG服务已启动并检查 RAG_HOST 配置"
+        if "read timed out" in normalized or "timeout" in normalized:
+            return "连接RAG服务超时，请检查服务状态、网络或超时设置"
+        return error
+
+    manual_content = (manual_content or "").strip()
+    kb_name = (kb_name or "").strip()
+
+    parts: List[str] = []
+    rag_error: Optional[str] = None
+    rag_warning: Optional[str] = None
+    rag_response: Optional[Dict[str, Any]] = None
+
+    if enable_rag and kb_name and kb_name != "custom":
+        try:
+            rag_response = get_rag_data(kb_name, query)
+        except Exception as e:
+            rag_error = humanize_error(str(e))
+        else:
+            if isinstance(rag_response, dict) and "error" in rag_response:
+                rag_error = humanize_error(str(rag_response.get("error") or "未知错误"))
+            else:
+                kb_content = format_rag_content(rag_response or {})
+                if kb_content:
+                    parts.append(kb_content)
+                else:
+                    rag_warning = "知识库未检索到相关内容"
+
+    if manual_content:
+        parts.append(manual_content)
+
+    return "\n\n".join(parts).strip(), rag_error, rag_warning, rag_response
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -27,6 +73,13 @@ app = FastAPI(
 
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Vue 前端（frontend/dist）支持：assets + SPA fallback
+FRONTEND_DIST_DIR = Path(__file__).parent / "frontend" / "dist"
+FRONTEND_INDEX_HTML = FRONTEND_DIST_DIR / "index.html"
+FRONTEND_ASSETS_DIR = FRONTEND_DIST_DIR / "assets"
+if FRONTEND_ASSETS_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_ASSETS_DIR)), name="frontend_assets")
 
 # 创建必要的目录
 Path("downloads").mkdir(exist_ok=True)
@@ -40,11 +93,16 @@ llm_client = LLMClient(model_type="third_party")
 template_generator = BaseTemplatesGenerator(model_type="third_party")
 # DocumentGenerator 用于处理AI生成大纲和全文的逻辑
 document_generator = DocumentGenerator(model_type="third_party")
+# 模板元数据存储
+template_store = TemplateStore()
+template_store.ensure_defaults(Path("templates"), template_generator.extract_variables_from_template, DEFAULT_TEMPLATE_METADATA)
 
 # 页面路由
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """首页"""
+    if FRONTEND_INDEX_HTML.is_file():
+        return FileResponse(FRONTEND_INDEX_HTML)
     return FileResponse("static/html/index.html")
 
 @app.get("/qa", response_class=HTMLResponse)
@@ -61,6 +119,11 @@ async def document_generator_page():
 async def template_generator_page():
     """模板生成页面"""
     return FileResponse("static/html/template_generator.html")
+
+@app.get("/templates", response_class=HTMLResponse)
+async def templates_showcase_page():
+    """模板展示页面"""
+    return FileResponse("static/html/templates_showcase.html")
 
 @app.get("/platform", response_class=HTMLResponse)
 async def platform_dashboard():
@@ -82,10 +145,6 @@ async def applications_page():
     """智能应用页面"""
     return FileResponse("static/html/applications.html")
 
-@app.get("/qa", response_class=HTMLResponse)
-async def qa_page():
-    return FileResponse("static/html/qa.html")
-
 # API: 生成大纲
 import traceback
 @app.post("/api/generate-outline")
@@ -96,20 +155,28 @@ async def generate_outline(request: Request):
         key_points = data.get("key_points", "")
         enable_rag = data.get("enable_rag", False)
         kb_name = data.get("kb_name", "")
+        custom_rag_content = data.get("custom_rag_content", "")
         
         if not topic:
             raise HTTPException(status_code=400, detail="主题不能为空")
             
-        # 如果启用了RAG，获取相关内容
-        rag_content = None
-        if enable_rag and kb_name:
-            rag_response = get_rag_data(kb_name, topic)
-            if "error" not in rag_response:
-                # 使用格式化函数处理RAG结果
-                rag_content = format_rag_content(rag_response)
+        reference_text, rag_error, rag_warning, _ = build_reference_text(
+            enable_rag=enable_rag,
+            kb_name=kb_name,
+            query=topic,
+            manual_content=custom_rag_content,
+        )
+        rag_content = reference_text or None
         
         # 使用全局document_generator实例
         result = document_generator.generate_outline(topic, key_points, rag_content)
+
+        if reference_text:
+            result["rag_used"] = True
+        if rag_warning:
+            result["rag_warning"] = rag_warning
+        if rag_error:
+            result["rag_error"] = rag_error
         
         return JSONResponse(content=result)
     except Exception as e:
@@ -163,24 +230,19 @@ async def generate_fulltext_stream(
             if key_points:
                 prompt += f"\n\n关键要点：{key_points}"
             
-            # 如果启用RAG，获取相关知识
-            rag_content = ""
-            if enable_rag:
-                try:
-                    if kb_name == "custom" and custom_rag_content:
-                        rag_content = custom_rag_content
-                    elif kb_name:
-                        # 使用知识库检索
-                        from knowledge_connect.get_rag_data import get_rag_data, format_rag_content
-                        rag_response = get_rag_data(kb_name, outline)
-                        rag_content = format_rag_content(rag_response)
-                    
-                    if rag_content:
-                        prompt += f"\n\n参考资料：\n{rag_content}"
-                except Exception as e:
-                    print(f"RAG处理错误: {e}")
-                    # 发送错误信息但继续处理
-                    yield f"data: {json.dumps({'error': f'RAG处理错误: {str(e)}'})}\n\n"
+            reference_text, rag_error, rag_warning, _ = build_reference_text(
+                enable_rag=enable_rag,
+                kb_name=kb_name,
+                query=outline,
+                manual_content=custom_rag_content,
+            )
+            if rag_error:
+                yield f"data: {json.dumps({'warning': f'RAG检索失败，将继续生成（可改用手动参考资料）：{rag_error}'})}\n\n"
+            elif rag_warning and enable_rag and kb_name and kb_name != "custom":
+                yield f"data: {json.dumps({'warning': rag_warning})}\n\n"
+
+            if reference_text:
+                prompt += f"\n\n参考资料：\n{reference_text}"
             
             # 构建消息列表
             messages = [
@@ -302,8 +364,9 @@ async def list_templates():
     列出所有可用的文档模板。
     """
     try:
-        # 使用全局 template_generator 实例列出模板
-        templates_list = template_generator.list_templates()
+        # 确保模板目录同步到存储
+        template_store.ensure_defaults(Path("templates"), template_generator.extract_variables_from_template, DEFAULT_TEMPLATE_METADATA)
+        templates_list = template_store.get_templates()
         return JSONResponse(content={"templates": templates_list})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
@@ -387,20 +450,36 @@ async def upload_template(template_name: str = Form(...),
         
         # 使用全局 template_generator 实例提取变量并注册模板
         # register_uploaded_template 应该处理元数据/变量提取
-        template_metadata = template_generator.register_uploaded_template(str(file_path))
+        template_metadata = template_generator.register_uploaded_template(
+            str(file_path),
+            template_name=safe_template_name.rsplit(".", 1)[0],
+            description=description,
+        )
+        variables = template_metadata.get("variables", [])
+        # 写入模板元数据存储
+        template_store.upsert_template(
+            {
+                "name": template_metadata.get("name"),
+                "filename": file_path.name,
+                "category": "上传",
+                "description": description or "用户上传模板",
+                "format": "DOCX",
+                "variables": variables,
+            }
+        )
         
         # 返回成功信息和提取的变量
         print({
             "success": True, 
             "filename": file_path.name, # 返回文件名
             "template_name": template_name, # 返回用户提供的名称
-            "variables": template_metadata.get("variables", [])
+            "variables": variables
         })
         return JSONResponse(content={
             "success": True, 
             "filename": file_path.name, # 返回文件名
             "template_name": template_name, # 返回用户提供的名称
-            "variables": template_metadata.get("variables", [])
+            "variables": variables
         })
     
     except Exception as e:
@@ -413,30 +492,37 @@ async def get_template_variables(template_name: str):
     获取指定模板文件中的变量列表。
     """
     try:
+        # 优先从元数据存储获取
+        stored = template_store.get_template(template_name)
+        if stored and stored.get("variables"):
+            return JSONResponse(content={"template_name": template_name, "variables": stored.get("variables", [])})
+
         # 根据 template_name 查找实际的文件名 (假设 .docx)
-        # 更健壮的方法可能需要存储 template_name -> filename 的映射
-        # 尝试查找匹配 template_name 的 .docx 文件
-        template_filename = None
         templates_dir = Path("templates")
-        for file in templates_dir.glob("*.docx"):
-            # Assuming template_name is stored/associated with the file somehow
-            # A simple approach is to match the base name (without extension)
-            # A better approach would be to query the registered templates list
-            # For now, let's assume template_name is the base filename
-            if file.stem == template_name:
-                 template_filename = file.name
-                 break
-        
-        if not template_filename:
-             return JSONResponse(
-                content={"error": f"模板文件 '{template_name}.docx' 不存在"}, # Or just '{template_name}'
+        template_path = templates_dir / f"{template_name}.docx"
+        if not template_path.exists():
+            for file in templates_dir.glob("*.docx"):
+                if file.stem == template_name:
+                    template_path = file
+                    break
+        if not template_path.exists():
+            return JSONResponse(
+                content={"error": f"模板文件 '{template_name}.docx' 不存在"},
                 status_code=404
             )
 
-        template_path = os.path.join("templates", template_filename)
-        
-        # 使用全局 template_generator 实例提取变量
-        variables = template_generator.extract_variables_from_template(template_path)
+        # 使用全局 template_generator 实例提取变量，并写入存储
+        variables = template_generator.extract_variables_from_template(str(template_path))
+        template_store.upsert_template(
+            {
+                "name": template_name,
+                "filename": template_path.name,
+                "category": stored.get("category") if stored else "通用",
+                "description": stored.get("description") if stored else "",
+                "format": "DOCX",
+                "variables": variables,
+            }
+        )
         
         return JSONResponse(content={"template_name": template_name, "variables": variables})
     
@@ -488,43 +574,53 @@ async def chat_stream(
     
     async def event_generator():
         try:
-            # 处理RAG逻辑，获取相关知识
-            rag_content = ""
-            references = []
-            
-            if enable_rag:
-                if kb_name == "custom" and custom_rag_content:
-                    rag_content = custom_rag_content
-                    print(f"使用自定义知识: {custom_rag_content[:50]}...")
-                    references.append({"title": "自定义知识", "content": custom_rag_content[:100] + "..."})
-                elif kb_name:
-                    print(f"从知识库 {kb_name} 检索相关内容...")
-                    rag_response = get_rag_data(kb_name, message)
-                    if "error" not in rag_response:
-                        rag_content = format_rag_content(rag_response)
-                        # 提取参考信息
-                        if "data" in rag_response and isinstance(rag_response["data"], list):
-                            for i, item in enumerate(rag_response["data"][:3]):  # 最多显示前3条参考
-                                if isinstance(item, dict):
-                                    # 提取标题和内容
-                                    title = "未知来源"
-                                    if "metadata" in item and "file_name" in item["metadata"]:
-                                        title = item["metadata"]["file_name"]
-                                    elif "title" in item:
-                                        title = item["title"]
-                                    
-                                    content = item.get("content", "")
-                                    if content:
-                                        references.append({
-                                            "title": title, 
-                                            "content": content[:200] + ("..." if len(content) > 200 else "")
-                                        })
-                        print(f"检索到 {len(references)} 条相关参考")
+            reference_text, rag_error, rag_warning, rag_response = build_reference_text(
+                enable_rag=enable_rag,
+                kb_name=kb_name,
+                query=message,
+                manual_content=custom_rag_content,
+            )
+            references: List[Dict[str, str]] = []
+
+            manual_text = (custom_rag_content or "").strip()
+            if manual_text:
+                references.append(
+                    {
+                        "title": "手动参考资料",
+                        "content": manual_text[:200] + ("..." if len(manual_text) > 200 else ""),
+                    }
+                )
+
+            if rag_error:
+                yield f"data: {json.dumps({'warning': f'RAG检索失败，将继续回答（可改用手动参考资料）：{rag_error}'})}\n\n"
+            elif rag_warning and enable_rag and kb_name and kb_name != "custom":
+                yield f"data: {json.dumps({'warning': rag_warning})}\n\n"
+            elif rag_response and isinstance(rag_response, dict):
+                items = rag_response.get("data")
+                if isinstance(items, list):
+                    for item in items[:3]:
+                        if not isinstance(item, dict):
+                            continue
+                        title = "未知来源"
+                        metadata = item.get("metadata")
+                        if isinstance(metadata, dict) and metadata.get("file_name"):
+                            title = str(metadata["file_name"])
+                        elif item.get("title"):
+                            title = str(item["title"])
+                        content = str(item.get("content") or item.get("text") or "")
+                        content = content.strip()
+                        if content:
+                            references.append(
+                                {
+                                    "title": title,
+                                    "content": content[:200] + ("..." if len(content) > 200 else ""),
+                                }
+                            )
             
             # 构建系统消息
             system_message = "你是一个专业的智能助手，请根据用户的问题提供准确、简洁的回答。"
-            if rag_content:
-                system_message += "\n\n以下是一些相关的参考信息，请在回答时参考这些信息：\n\n" + rag_content
+            if reference_text:
+                system_message += "\n\n以下是一些相关的参考信息，请在回答时参考这些信息：\n\n" + reference_text
             
             # 构建消息列表
             messages = [
@@ -599,7 +695,7 @@ async def ai_fill_template_variables(request: Request):
         template_name = data.get("template_name")
         enable_rag = data.get("enable_rag", False)
         kb_name = data.get("kb_name", "default")
-        custom_rag_content = data.get("custom_rag_content")
+        custom_rag_content = data.get("custom_rag_content", "")
         
         if not template_name:
             raise HTTPException(status_code=400, detail="模板名称不能为空")
@@ -628,15 +724,12 @@ async def ai_fill_template_variables(request: Request):
         # 获取模板内容用于上下文
         template_content = template_generator.get_template_content(template_path)
         
-        # 使用RAG获取相关内容
-        rag_content = ""
-        if enable_rag:
-            if kb_name == "custom" and custom_rag_content:
-                rag_content = custom_rag_content
-            else:
-                rag_response = get_rag_data(kb_name, template_name)  # 使用模板名称作为查询
-                if "error" not in rag_response:
-                    rag_content = format_rag_content(rag_response)
+        reference_text, rag_error, rag_warning, _ = build_reference_text(
+            enable_rag=enable_rag,
+            kb_name=kb_name,
+            query=template_name,
+            manual_content=custom_rag_content,
+        )
             
         # 构建提示词
         prompt = f"""请根据以下信息，为文档模板填充变量值：
@@ -647,8 +740,8 @@ async def ai_fill_template_variables(request: Request):
 需要填充的变量：
 {json.dumps(variables, ensure_ascii=False, indent=2)}
 
-{"相关参考信息：" if rag_content else ""}
-{rag_content if rag_content else ""}
+{"相关参考信息：" if reference_text else ""}
+{reference_text if reference_text else ""}
 
 请根据模板内容和参考信息，生成合适的变量值。返回格式为JSON对象，key为变量名，value为填充值。
 注意：
@@ -675,9 +768,35 @@ async def ai_fill_template_variables(request: Request):
         if not reply:
             raise HTTPException(status_code=500, detail="模型返回内容为空")
             
+        def parse_llm_json(raw_text: str):
+            """
+            尽量从模型输出中解析出 JSON 对象：
+            - 兼容 ```json ... ``` 代码块
+            - 兼容在 JSON 前后带说明文字（提取首尾大括号）
+            """
+            cleaned = (raw_text or "").strip()
+            if not cleaned:
+                raise ValueError("模型返回内容为空")
+
+            if cleaned.startswith("```"):
+                cleaned = re.sub(r"^```[a-zA-Z0-9_-]*\\s*", "", cleaned)
+                cleaned = re.sub(r"\\s*```$", "", cleaned)
+                cleaned = cleaned.strip()
+
+            try:
+                return json.loads(cleaned)
+            except json.JSONDecodeError:
+                start = cleaned.find("{")
+                end = cleaned.rfind("}")
+                if start != -1 and end != -1 and end > start:
+                    return json.loads(cleaned[start : end + 1])
+                raise
+
         # 解析返回的JSON
         try:
-            variables_values = json.loads(reply)
+            variables_values = parse_llm_json(reply)
+            if not isinstance(variables_values, dict):
+                raise HTTPException(status_code=500, detail="模型返回的不是JSON对象")
             # 验证返回的变量是否完整
             missing_vars = [var["name"] for var in variables if var["name"] not in variables_values]
             if missing_vars:
@@ -685,11 +804,15 @@ async def ai_fill_template_variables(request: Request):
                 
             return JSONResponse(content={
                 "success": True,
-                "variables": variables_values
+                "variables": variables_values,
+                "rag_warning": rag_warning,
+                "rag_error": rag_error
             })
         except json.JSONDecodeError:
             raise HTTPException(status_code=500, detail="模型返回的不是有效的JSON格式")
             
+    except HTTPException as e:
+        return JSONResponse(content={"success": False, "error": e.detail}, status_code=e.status_code)
     except Exception as e:
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
 
@@ -819,6 +942,26 @@ async def generate_docx(request: Request):
     except Exception as e:
         traceback.print_exc()
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+# Vue 单页应用（history 路由）兜底：未命中文件时返回 dist/index.html
+@app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+async def spa_fallback(full_path: str):
+    if not FRONTEND_INDEX_HTML.is_file():
+        raise HTTPException(status_code=404)
+
+    if full_path.startswith(("api", "download", "static", "docs")) or full_path in {"openapi.json", "redoc"}:
+        raise HTTPException(status_code=404)
+
+    dist_root = FRONTEND_DIST_DIR.resolve()
+    candidate = (FRONTEND_DIST_DIR / full_path).resolve()
+    try:
+        candidate.relative_to(dist_root)
+    except ValueError:
+        raise HTTPException(status_code=404)
+
+    if candidate.is_file():
+        return FileResponse(candidate)
+    return FileResponse(FRONTEND_INDEX_HTML)
 
 # 运行应用
 if __name__ == "__main__":

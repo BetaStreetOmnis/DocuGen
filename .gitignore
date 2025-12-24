@@ -1,6 +1,7 @@
 # 忽略 .env 文件
 .env
 .env.*
+!.env.example
 
 # 字节码和编译文件
 __pycache__/
@@ -25,6 +26,15 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+node_modules/
+frontend/dist/
+
+# 运行时数据 / 用户内容
+downloads/
+data/
+templates.db
+templates/*.docx
+templates/*.doc
 
 # 日志文件
 *.log
