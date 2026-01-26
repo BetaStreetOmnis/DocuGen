@@ -7,7 +7,7 @@
 </div>
 
 <p align="center">
-  <a href="http://150.138.81.55:8080/" target="_blank">
+  <a href="http://124.132.152.75:8080/" target="_blank">
     <img alt="Live Demo" src="https://img.shields.io/badge/live_demo-online-brightgreen.svg"/>
   </a>
   <a href="LICENSE">
@@ -25,7 +25,7 @@
 </p>
 
 <h3 align="center">
-  <a href="http://150.138.81.55:8080/"><strong>🚀 Try the Live Demo &raquo;</strong></a>
+  <a href="http://124.132.152.75:8080/"><strong>🚀 Try the Live Demo &raquo;</strong></a>
 </h3>
 
 <p align="center">

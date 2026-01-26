@@ -9,7 +9,7 @@
 </div>
 
 <p align="center">
-  <a href="124.132.152.75:8080/" target="_blank">
+  <a href="http://124.132.152.75:8080/" target="_blank">
     <img alt="Live Demo" src="https://img.shields.io/badge/🚀_在线体验-brightgreen.svg"/>
   </a>
   <a href="https://github.com/BetaStreetOmnis/EasyRAG">
@@ -119,6 +119,6 @@ A: 取决于 EasyRAG 的支持，详见其[项目文档](https://github.com/Beta
 
 **⭐ 如果这个项目对你有帮助，请给个 Star！**
 
-[🚀 在线体验](http://170.106.72.96:8080/) • [📚 知识库项目](https://github.com/BetaStreetOmnis/EasyRAG)
+[🚀 在线体验](http://124.132.152.75:8080/) • [📚 知识库项目](https://github.com/BetaStreetOmnis/EasyRAG)
 
 </div>
