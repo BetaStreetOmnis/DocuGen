@@ -47,6 +47,8 @@ This project aims to solve common pain points in traditional document writing, s
 
 ![Main Interface](docs/images/document_generator.png)
 
+> Note: This repository only open-sources the backend API. The web UI is not included.
+
 ## 2. Core Features
 
 - **✨ Intelligent Knowledge Extraction**: Connect to your local files, databases, or knowledge sources like Notion to automatically extract and understand core content.
@@ -60,13 +62,13 @@ This project aims to solve common pain points in traditional document writing, s
 
 DocuGen uses a modular design with a decoupled front-end and back-end to ensure system flexibility and scalability.
 
-1.  **UI (User Interface)**: A web interface, rendered server-side via the FastAPI framework, for managing knowledge bases, editing templates, and initiating document generation tasks.
+1.  **UI (User Interface)**: Provided separately and not open-sourced in this repository. You can connect your own UI to the API.
 2.  **Backend Service**: Based on Python (FastAPI), it handles API requests and orchestrates the core business logic.
 3.  **Knowledge Base Module**: The core knowledge base functionality is provided by the independent open-source project **[EasyRAG](https://github.com/BetaStreetOmnis/EasyRAG)**. DocuGen interacts with the EasyRAG service via API for document uploading, vectorization, and intelligent retrieval.
 4.  **Generation Engine**: Encapsulates the interaction logic with the LLM, combining templates and retrieved knowledge to generate the final document.
 5.  **LLM Service**: Can be configured to connect to various third-party or locally-deployed Large Language Model services.
 
-![System Architecture](docs/images/architecture.png)
+![System Architecture](docs/images/diagram_1750905171.png)
 
 ## 4. Installation & Configuration
 
@@ -84,20 +86,30 @@ pip install -r requirements.txt
 
 ### 4.3 Configuration
 
-In your `config.py` or `.env` file, configure your service information:
+DocuGen reads settings from `.env`. Start from the example:
 
-```python
-# LLM Configuration
-LLM_CONFIG = {
-    "API_BASE_URL": "Your LLM API Base URL",
-    "API_KEY": "Your LLM API Key",
-    "MODEL_NAME": "The model name you want to use",
-}
+```bash
+cp .env.example .env
+```
 
-# Dependencies Configuration
-DEPENDENCIES_CONFIG = {
-    "EASYRAG_API_URL": "http://127.0.0.1:8000" # The API URL of your deployed EasyRAG service
-}
+Key variables:
+
+```bash
+# App
+APP_HOST=0.0.0.0
+APP_PORT=8080
+
+# LLM (OpenAI-compatible)
+DEFAULT_LLM_TYPE=third_party
+THIRD_PARTY_LLM_BASE_URL=https://api.openai.com/v1/chat/completions
+THIRD_PARTY_LLM_API_KEY=your_api_key
+THIRD_PARTY_LLM_DEFAULT_MODEL=gpt-3.5-turbo
+
+# EasyRAG / RAG (no scheme)
+RAG_HOST=127.0.0.1:8024
+
+# Optional auth
+AUTH_REQUIRED=false
 ```
 
 ## 5. Usage
@@ -107,9 +119,9 @@ DEPENDENCIES_CONFIG = {
 1.  **Start the EasyRAG Service**: Follow the [EasyRAG project documentation](https://github.com/BetaStreetOmnis/EasyRAG) to start its API service.
 2.  **Start the DocuGen Service**:
     ```bash
-    python app.py
+    python -m backend.app
     ```
-    > **Note**: Please ensure that DocuGen (e.g., running on port 8080) and EasyRAG (default API on port 8000) are running on different ports to avoid conflicts.
+    > **Note**: Adjust the port via `APP_PORT` in `.env`.
 
 ### 5.2 Workflow
 
@@ -118,9 +130,9 @@ DEPENDENCIES_CONFIG = {
     - Follow its instructions to create your knowledge base and upload your documents.
 
 2.  **Step 2: Generate Document (in DocuGen)**
-    - Access the DocuGen application interface (e.g., `http://127.0.0.1:8080`).
-    - The interface will automatically list the knowledge bases you have created in EasyRAG.
-    - Select a knowledge base, choose a document template, enter your generation requirements, and click "Generate Document".
+    - Open the API docs at `http://127.0.0.1:8080/docs` or connect your own UI to the API.
+    - Use the API to list knowledge bases, manage templates, and trigger document generation.
+    - Usage guide: `docs/USAGE.md`.
 
 3.  **Step 3: Preview and Export**
     - The system will call EasyRAG to retrieve relevant knowledge and generate the document in conjunction with the LLM.
@@ -129,7 +141,7 @@ DEPENDENCIES_CONFIG = {
 ## 6. FAQ
 
 - **Q: Why can't I see my knowledge base in DocuGen?**
-  - **A**: Please first ensure that your EasyRAG service is running correctly and that the `EASYRAG_API_URL` in DocuGen's configuration file is correct.
+  - **A**: Ensure EasyRAG is running and check `RAG_HOST` in `.env` (example: `127.0.0.1:8024`).
 
 - **Q: What types of source files are supported?**
   - **A**: This depends on the support provided by the EasyRAG project. Please consult the [EasyRAG documentation](https://github.com/BetaStreetOmnis/EasyRAG) for a list of supported file types.

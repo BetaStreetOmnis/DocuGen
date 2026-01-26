@@ -30,6 +30,8 @@
 
 ![主界面](docs/images/index.png)
 
+> 说明：本仓库仅开源后端 API，Web 界面未包含。
+
 ## ⚡ 快速开始
 
 ### 1️⃣ 准备知识库（使用 EasyRAG）
@@ -40,8 +42,6 @@
 - 🔍 自动建立向量索引，智能检索
 - 🌐 在线体验：http://easyrag.net/static/index.html
 
-![知识库问答](docs/images/qa.png)
-
 ### 2️⃣ 启动 DocuGen 服务
 
 ```bash
@@ -49,14 +49,19 @@
 pip install -r requirements.txt
 
 # 启动服务
-python app.py
+python -m backend.app
 ```
 
-### 3️⃣ 开始生成文档
+### 3️⃣ 通过 API 生成文档
 
-访问 http://127.0.0.1:8080，选择知识库和模板，开始创作！
+访问 http://127.0.0.1:8080/docs（或按 `.env` 的 `APP_PORT`），查看接口文档并通过 API 调用生成。
 
 ![文档生成器](docs/images/document_generator.png)
+
+## 🧭 使用引导
+
+- 文档版引导：见 `docs/USAGE.md`
+- 模板占位符：支持 `【变量】` 或 `{{变量}}`
 
 ## 🎨 模板功能
 
@@ -83,18 +88,24 @@ python app.py
 在 `.env` 文件中配置：
 
 ```bash
-# LLM配置
-LLM_API_URL=你的大模型API地址
-LLM_API_KEY=你的API密钥
+# 应用配置
+APP_HOST=0.0.0.0
+APP_PORT=8080
 
-# EasyRAG配置  
-EASYRAG_API_URL=http://127.0.0.1:8000
+# LLM配置（OpenAI 兼容接口）
+DEFAULT_LLM_TYPE=third_party
+THIRD_PARTY_LLM_BASE_URL=你的大模型API地址
+THIRD_PARTY_LLM_API_KEY=你的API密钥
+THIRD_PARTY_LLM_DEFAULT_MODEL=模型名
+
+# EasyRAG（RAG）配置（注意：不需要带 http://）
+RAG_HOST=127.0.0.1:8024
 ```
 
 ## ❓ 常见问题
 
 **Q: 看不到我的知识库？**  
-A: 确保 EasyRAG 服务正在运行，检查配置中的 API 地址。
+A: 确保 EasyRAG 服务正在运行，检查 `.env` 里的 `RAG_HOST` 配置。
 
 **Q: 生成内容不准确？**  
 A: 优化知识库内容质量，使用更强的 LLM 模型。
