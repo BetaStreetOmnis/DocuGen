@@ -9,7 +9,7 @@
 </div>
 
 <p align="center">
-  <a href="http://124.132.152.75:8080/" target="_blank">
+  <a href="http://170.106.190.193/docugen/" target="_blank">
     <img alt="Live Demo" src="https://img.shields.io/badge/🚀_在线体验-brightgreen.svg"/>
   </a>
   <a href="https://github.com/BetaStreetOmnis/EasyRAG">
@@ -32,6 +32,8 @@
 
 > 说明：本仓库仅开源后端 API，Web 界面未包含。
 
+> 部署更新（2026-10-07）：DocuGen 入口已迁至 http://170.106.190.193/docugen/ 。主页、文档生成、模板生成和问答页面可加载，知识库与模板列表接口已验证。模型生成全流程仍需单独验收。
+
 ## ⚡ 快速开始
 
 ### 1️⃣ 准备知识库（使用 EasyRAG）
@@ -40,7 +42,7 @@
 
 - 📄 支持 PDF、Word、Markdown 等格式
 - 🔍 自动建立向量索引，智能检索
-- 🌐 在线体验：http://easyrag.net/static/index.html
+- 🌐 EasyRAG 在线入口：https://easyrag.net/ （需要访问凭据）
 
 ### 2️⃣ 启动 DocuGen 服务
 
@@ -119,6 +121,6 @@ A: 取决于 EasyRAG 的支持，详见其[项目文档](https://github.com/Beta
 
 **⭐ 如果这个项目对你有帮助，请给个 Star！**
 
-[🚀 在线体验](http://124.132.152.75:8080/) • [📚 知识库项目](https://github.com/BetaStreetOmnis/EasyRAG)
+[🚀 在线体验](http://170.106.190.193/docugen/) • [📚 知识库项目](https://github.com/BetaStreetOmnis/EasyRAG)
 
 </div>

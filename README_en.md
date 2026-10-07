@@ -7,7 +7,7 @@
 </div>
 
 <p align="center">
-  <a href="http://124.132.152.75:8080/" target="_blank">
+  <a href="http://170.106.190.193/docugen/" target="_blank">
     <img alt="Live Demo" src="https://img.shields.io/badge/live_demo-online-brightgreen.svg"/>
   </a>
   <a href="LICENSE">
@@ -25,7 +25,7 @@
 </p>
 
 <h3 align="center">
-  <a href="http://124.132.152.75:8080/"><strong>🚀 Try the Live Demo &raquo;</strong></a>
+  <a href="http://170.106.190.193/docugen/"><strong>🚀 Try the Live Demo &raquo;</strong></a>
 </h3>
 
 <p align="center">
@@ -38,6 +38,8 @@
 </p>
 
 ---
+
+> Deployment update (2026-10-07): DocuGen is hosted at http://170.106.190.193/docugen/ . The home, document, template, and Q&A pages load, and the knowledge-base and template list endpoints have been checked. End-to-end model generation requires separate validation.
 
 ## 1. Overview
 
@@ -126,7 +128,7 @@ AUTH_REQUIRED=false
 ### 5.2 Workflow
 
 1.  **Step 1: Manage Knowledge Base (in EasyRAG)**
-    - Open the EasyRAG web interface (default: `http://127.0.0.1:8024`), Live Demo: http://150.138.81.55:8024/static/index.html.
+    - Open EasyRAG at the port used by your deployment. The Docker example uses `http://127.0.0.1:8028`. The hosted entry https://easyrag.net/ requires access credentials.
     - Follow its instructions to create your knowledge base and upload your documents.
 
 2.  **Step 2: Generate Document (in DocuGen)**
